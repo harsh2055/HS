@@ -1,93 +1,85 @@
-# Hand-Tracking-Using-Opencv
+# Hand Tracking Live 🖐️
 
-## About The Project
+A real-time, high-performance hand tracking application built with MediaPipe and JavaScript. This project allows users to track hand landmarks directly in their web browser using their webcam, with zero backend processing required.
 
-This Python script utilizes OpenCV and MediaPipe to perform real-time hand tracking using a webcam. The code captures video input from the default camera, processes the frames to detect and track hand landmarks using the MediaPipe Hands module, and subsequently visualizes the landmarks on the live feed. For each detected hand, the script identifies and prints the coordinates of the landmarks, with a distinctive filled circle highlighting the first landmark (index 0). The frame rate is calculated and displayed in the corner, providing insights into the processing speed. Overall, this script combines the power of computer vision libraries to create a hands-on experience, quite literally, by bringing hand-tracking capabilities to your fingertips. It's a practical demonstration of the intersection between software and real-world interaction, opening doors to diverse applications such as virtual reality, gaming, and accessibility interface.
+**Live Demo:** [https://hs-sand.vercel.app/](https://hs-sand.vercel.app/)
 
+---
 
-https://github.com/KalyanMurapaka45/Hand-Tracking-Using-Opencv/assets/101493756/e0d7fae9-4a16-4639-b5fe-04d5c7f6ce38
+## 🌟 Features
 
+- **Real-time Tracking:** Instant detection and tracking of hand landmarks.
+- **FPS Monitoring:** Live frames-per-second display to monitor performance.
+- **Interactive Visuals:** Dynamic rendering of hand connections and key points on an HTML5 Canvas.
+- **Mirror Mode:** The video feed is mirrored to provide a natural "mirror-like" user experience.
+- **Privacy-First:** All processing happens locally on the user's device using WebAssembly—no video data is sent to any server.
 
-## Built With
+---
 
- - Opencv
- - Mediapipe
-   
+## 🛠️ Technologies Used
 
-## Getting Started
+- **[MediaPipe Hands](https://google.github.io/mediapipe/solutions/hands.html):** A high-fidelity hand and finger tracking solution.
+- **JavaScript (ES6+):** Core logic for processing video frames and rendering visuals.
+- **HTML5 Canvas:** High-performance drawing of landmarks and connectors.
+- **CSS3:** Modern, dark-themed responsive UI.
+- **Vercel:** Cloud hosting for seamless deployment.
 
-This will help you understand how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+---
 
-## Installation Steps
+## 🚀 How it Works
 
-### Option 1: Installation from GitHub
+### 1. Camera Initialization
+The application utilizes the `navigator.mediaDevices.getUserMedia` API (via MediaPipe's `Camera` utility) to request access to the user's webcam and start a live video stream.
 
-Follow these steps to install and set up the project directly from the GitHub repository:
+### 2. MediaPipe Hand Model
+We initialize the MediaPipe `Hands` model with the following configuration:
+- **Model Complexity:** Balanced for performance and accuracy.
+- **Min Detection Confidence:** 0.5 (Ensures a hand is actually present).
+- **Min Tracking Confidence:** 0.5 (Maintains tracking even during fast movement).
 
-1. **Clone the Repository**
-   - Open your terminal or command prompt.
-   - Navigate to the directory where you want to install the project.
-   - Run the following command to clone the GitHub repository:
-     ```
-     git clone https://github.com/KalyanMurapaka45/Hand-Tracking-Using-Opencv.git
-     ```
+### 3. Frame Processing
+For every frame captured by the webcam:
+- The frame is passed to the MediaPipe `hands.send()` method.
+- MediaPipe processes the image using a machine learning pipeline to identify 21 unique hand landmarks (joints).
 
-2. **Create a Virtual Environment** (Optional but recommended)
-   - It's a good practice to create a virtual environment to manage project dependencies. Run the following command:
-     ```
-     conda create -p <Environment_Name> python==<python version> -y
-     ```
+### 4. Real-time Rendering
+The results are passed to a callback function where:
+- The raw video frame is drawn onto an HTML5 Canvas.
+- The 21 landmarks and their corresponding connections are overlaid on the canvas using `drawing_utils`.
+- A special highlight is applied to the wrist landmark (ID 0) for visual emphasis.
 
-3. **Activate the Virtual Environment** (Optional)
-   - Activate the virtual environment based on your operating system:
-       ```
-       conda activate <Environment_Name>/
-       ```
+---
 
-4. **Install Dependencies**
-   - Navigate to the project directory:
-     ```
-     cd [project_directory]
-     ```
-   - Run the following command to install project dependencies:
-     ```
-     pip install -r requirements.txt
-     ```
+## 💻 Running Locally
 
-5. **Run the Project**
-   - Start the project by running the appropriate command.
-     ```
-     python app.py
-     ```
+To run this project on your own machine:
 
-6. **Access the Project**
-   - Open a web browser or the appropriate client to access the project.
-  
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/harsh2055/HS.git
+   cd HS/web_version
+   ```
 
-## Contributing
+2. **Serve the files:**
+   Since webcam access requires a secure context or a local server, use a tool like `npx serve`:
+   ```bash
+   npx serve .
+   ```
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+3. **Open in Browser:**
+   Navigate to `http://localhost:3000`.
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
+---
 
-1. Fork the Project
-2. Create your Feature Branch
-3. Commit your Changes
-4. Push to the Branch
-5. Open a Pull Request
+## 📦 Deployment
 
-## License
+This project is optimized for **Vercel**. To deploy your own version:
+1. Push your code to GitHub.
+2. Import the repository into Vercel.
+3. Set the **Root Directory** to `web_version`.
+4. Click **Deploy**.
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+---
 
-
-## Contact
-
-Hema Kalyan Murapaka - [@kalyanmurapaka274@gmail.com](kalyanmurapaka274@gmail.com)
-
-
-## Acknowledgements
-
-We'd like to extend our gratitude to all individuals and organizations who have played a role in the development and success of this project. Your support, whether through contributions, inspiration, or encouragement, has been invaluable. Thank you for being a part of our journey.
+## 📜 License
+Distributed under the MIT License.
