@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hand Tracking Web App</title>
+  <title>Advanced Hand Tracking Web App</title>
   <link rel="stylesheet" href="style.css">
   
   <!-- MediaPipe Libraries -->
@@ -14,14 +14,28 @@
 </head>
 <body>
   <div class="container">
-    <h1>Hand Tracking Web</h1>
-    <p>Please allow webcam access when prompted.</p>
-    <div class="video-container">
-      <video class="input_video" style="display: none;" autoplay playsinline></video>
-      <canvas class="output_canvas" width="640" height="480"></canvas>
-      <div id="loading" class="loading">Loading MediaPipe Models...</div>
+    <header>
+      <h1>AI Hand Tracking 🖐️</h1>
+      <p>Recognizes Gestures • Pinch • Peace • Fist • Thumbs Up</p>
+    </header>
+    
+    <div class="controls">
+      <button id="toggleCamera" class="btn">Stop Camera</button>
     </div>
-    <div id="fps">FPS: 0</div>
+
+    <div class="main-content">
+      <div class="video-container">
+        <video class="input_video" style="display: none;" autoplay playsinline></video>
+        <canvas class="output_canvas" width="800" height="600"></canvas>
+        <div id="loading" class="overlay-badge">Loading AI Models...</div>
+        
+        <!-- Live HUD inside the canvas area -->
+        <div class="hud">
+          <div id="fps" class="hud-item">FPS: 0</div>
+          <div id="gestureLabel" class="hud-item highlight">Gesture: None</div>
+        </div>
+      </div>
+    </div>
   </div>
   <script src="app.js"></script>
 </body>
