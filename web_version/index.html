@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced Hand Tracking Web App</title>
+  <title>Aether | Advanced Gesture System</title>
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
   
   <!-- MediaPipe Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
@@ -13,30 +14,74 @@
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>AI Hand Tracking 🖐️</h1>
-      <p>Recognizes Gestures • Pinch • Peace • Fist • Thumbs Up</p>
-    </header>
-    
-    <div class="controls">
-      <button id="toggleCamera" class="btn">Stop Camera</button>
+
+  <!-- Landing Page -->
+  <div id="landingSection" class="landing-section">
+    <div class="hero">
+      <div class="glass-panel">
+        <h1>Aether Gestures <span class="badge">v2.0</span></h1>
+        <p class="subtitle">A production-grade, event-driven computer vision system.</p>
+        
+        <div class="features-grid">
+          <div class="feature-card">
+            <h3>⚡ Event Engine</h3>
+            <p>Decoupled architecture with temporal smoothing and debouncing.</p>
+          </div>
+          <div class="feature-card">
+            <h3>🖐️ Complex Gestures</h3>
+            <p>Pinch-and-drag, dynamic swipes, and continuous hold tracking.</p>
+          </div>
+          <div class="feature-card">
+            <h3>⚙️ Action Mapping</h3>
+            <p>JSON-based dynamic mapping for mouse control and media events.</p>
+          </div>
+        </div>
+
+        <button id="launchAppBtn" class="btn-primary">Launch Interactive Demo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App Interface -->
+  <div id="appSection" class="app-section" style="display: none;">
+    <div class="top-bar">
+      <div class="brand">Aether System</div>
+      <div class="controls">
+        <button id="toggleCameraBtn" class="btn-secondary">Stop Camera</button>
+        <button id="closeAppBtn" class="btn-ghost">Exit</button>
+      </div>
     </div>
 
-    <div class="main-content">
-      <div class="video-container">
+    <div class="workspace">
+      <div class="video-panel">
         <video class="input_video" style="display: none;" autoplay playsinline></video>
         <canvas class="output_canvas" width="800" height="600"></canvas>
-        <div id="loading" class="overlay-badge">Loading AI Models...</div>
+        <div id="loadingOverlay" class="loading-overlay">
+          <div class="spinner"></div>
+          <p>Initializing Neural Networks...</p>
+        </div>
         
-        <!-- Live HUD inside the canvas area -->
-        <div class="hud">
-          <div id="fps" class="hud-item">FPS: 0</div>
-          <div id="gestureLabel" class="hud-item highlight">Gesture: None</div>
+        <!-- Smart HUD -->
+        <div class="smart-hud">
+          <div class="hud-stat">
+            <span class="label">STATE</span>
+            <span id="gestureState" class="value text-green">Idle</span>
+          </div>
+          <div class="hud-stat">
+            <span class="label">FPS</span>
+            <span id="fpsCount" class="value">0</span>
+          </div>
+        </div>
+
+        <!-- Event Log -->
+        <div class="event-logger">
+          <h4>Event Stream</h4>
+          <ul id="eventList"></ul>
         </div>
       </div>
     </div>
   </div>
+
   <script src="app.js"></script>
 </body>
 </html>

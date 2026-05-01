@@ -1,85 +1,66 @@
-# Hand Tracking Live 🖐️
+# Aether: Advanced Gesture Interaction System
 
-A real-time, high-performance hand tracking application built with MediaPipe and JavaScript. This project allows users to track hand landmarks directly in their web browser using their webcam, with zero backend processing required.
+A highly polished, extensible, and intelligent hand tracking and gesture interaction framework. It features a robust Python backend for OS-level control (virtual mouse, volume) and a premium Web Interface for browser-based interactions.
 
-**Live Demo:** [https://hs-sand.vercel.app/](https://hs-sand.vercel.app/)
-
----
-
-## 🌟 Features
-
-- **Real-time Tracking:** Instant detection and tracking of hand landmarks.
-- **FPS Monitoring:** Live frames-per-second display to monitor performance.
-- **Interactive Visuals:** Dynamic rendering of hand connections and key points on an HTML5 Canvas.
-- **Mirror Mode:** The video feed is mirrored to provide a natural "mirror-like" user experience.
-- **Privacy-First:** All processing happens locally on the user's device using WebAssembly—no video data is sent to any server.
+**Live Web Demo:** [https://hs-sand.vercel.app/](https://hs-sand.vercel.app/)
 
 ---
 
-## 🛠️ Technologies Used
+## 🏗️ Architecture
 
-- **[MediaPipe Hands](https://google.github.io/mediapipe/solutions/hands.html):** A high-fidelity hand and finger tracking solution.
-- **JavaScript (ES6+):** Core logic for processing video frames and rendering visuals.
-- **HTML5 Canvas:** High-performance drawing of landmarks and connectors.
-- **CSS3:** Modern, dark-themed responsive UI.
-- **Vercel:** Cloud hosting for seamless deployment.
+The system has been completely rewritten into a modular, event-driven architecture suitable for production:
 
----
+### 1. `core/hand_detector.py`
+A wrapper around MediaPipe Hands that extracts landmarks, calculates center points, and tracks finger states.
 
-## 🚀 How it Works
+### 2. `core/gesture_recognizer.py`
+Performs raw, frame-by-frame gesture classification (e.g., Pinch, Fist, Open Palm).
 
-### 1. Camera Initialization
-The application utilizes the `navigator.mediaDevices.getUserMedia` API (via MediaPipe's `Camera` utility) to request access to the user's webcam and start a live video stream.
+### 3. `core/event_engine.py` (The Brain)
+Implements temporal smoothing (majority voting over a rolling buffer) to eliminate flickering. It tracks gesture state transitions (`Start`, `Hold`, `End`) and calculates velocity for dynamic gestures (`SwipeLeft`, `SwipeRight`). Emits clean events to subscribers.
 
-### 2. MediaPipe Hand Model
-We initialize the MediaPipe `Hands` model with the following configuration:
-- **Model Complexity:** Balanced for performance and accuracy.
-- **Min Detection Confidence:** 0.5 (Ensures a hand is actually present).
-- **Min Tracking Confidence:** 0.5 (Maintains tracking even during fast movement).
+### 4. `core/system_controller.py`
+Handles all OS-level side effects (moving the mouse via `pyautogui`, controlling Windows volume via `pycaw`).
 
-### 3. Frame Processing
-For every frame captured by the webcam:
-- The frame is passed to the MediaPipe `hands.send()` method.
-- MediaPipe processes the image using a machine learning pipeline to identify 21 unique hand landmarks (joints).
-
-### 4. Real-time Rendering
-The results are passed to a callback function where:
-- The raw video frame is drawn onto an HTML5 Canvas.
-- The 21 landmarks and their corresponding connections are overlaid on the canvas using `drawing_utils`.
-- A special highlight is applied to the wrist landmark (ID 0) for visual emphasis.
+### 5. `core/action_mapper.py` & `config.json`
+Provides a decoupled configuration layer. You can dynamically map engine events to system actions by simply editing `config.json` (e.g., mapping `"onPinchStart": "click"`).
 
 ---
 
-## 💻 Running Locally
+## 💻 Web Version (Showcase)
 
-To run this project on your own machine:
+The `web_version/` directory contains a portfolio-grade JavaScript implementation of the Aether architecture. 
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/harsh2055/HS.git
-   cd HS/web_version
-   ```
+**Features:**
+* **Premium Landing Page:** Glassmorphism UI with CSS grid layout.
+* **JS Event Engine:** Temporal smoothing and pub/sub event logging built natively in ES6 JavaScript.
+* **Smart HUD:** Real-time state logging, FPS tracking, and visual feedback overlays on the canvas.
 
-2. **Serve the files:**
-   Since webcam access requires a secure context or a local server, use a tool like `npx serve`:
-   ```bash
-   npx serve .
-   ```
-
-3. **Open in Browser:**
-   Navigate to `http://localhost:3000`.
+To run locally:
+```bash
+cd web_version
+python -m http.server 8000
+```
+Then open `http://localhost:8000` in your browser.
 
 ---
 
-## 📦 Deployment
+## 🚀 Running the Python OS Controller
 
-This project is optimized for **Vercel**. To deploy your own version:
-1. Push your code to GitHub.
-2. Import the repository into Vercel.
-3. Set the **Root Directory** to `web_version`.
-4. Click **Deploy**.
+Ensure you are using **Python 3.11** (due to MediaPipe legacy module compatibility on Windows).
 
----
+**Install Dependencies:**
+```bash
+py -3.11 -m pip install opencv-python mediapipe==0.10.14 pyautogui pycaw comtypes
+```
 
-## 📜 License
-Distributed under the MIT License.
+**Run the System:**
+```bash
+py -3.11 main.py
+```
+
+**Default Controls (`config.json`):**
+* **Hold 'Point' (Index up):** Move virtual mouse.
+* **Pinch:** Click mouse.
+* **Hold 'Fist':** Control master volume (mapped to hand distance from center).
+* **Open Palm:** Idle/Reset.
