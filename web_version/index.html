@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hand Tracking Web App</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- MediaPipe Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Hand Tracking Web</h1>
+    <p>Please allow webcam access when prompted.</p>
+    <div class="video-container">
+      <video class="input_video" style="display: none;" autoplay playsinline></video>
+      <canvas class="output_canvas" width="640" height="480"></canvas>
+      <div id="loading" class="loading">Loading MediaPipe Models...</div>
+    </div>
+    <div id="fps">FPS: 0</div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
