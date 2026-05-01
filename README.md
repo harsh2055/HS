@@ -1,66 +1,81 @@
-# Aether: Advanced Gesture Interaction System
+# 🌌 Aether Gesture Platform v3.0
 
-A highly polished, extensible, and intelligent hand tracking and gesture interaction framework. It features a robust Python backend for OS-level control (virtual mouse, volume) and a premium Web Interface for browser-based interactions.
+**Production-grade, intelligent, and extensible gesture interaction system.**
 
-**Live Web Demo:** [https://hs-sand.vercel.app/](https://hs-sand.vercel.app/)
-
----
-
-## 🏗️ Architecture
-
-The system has been completely rewritten into a modular, event-driven architecture suitable for production:
-
-### 1. `core/hand_detector.py`
-A wrapper around MediaPipe Hands that extracts landmarks, calculates center points, and tracks finger states.
-
-### 2. `core/gesture_recognizer.py`
-Performs raw, frame-by-frame gesture classification (e.g., Pinch, Fist, Open Palm).
-
-### 3. `core/event_engine.py` (The Brain)
-Implements temporal smoothing (majority voting over a rolling buffer) to eliminate flickering. It tracks gesture state transitions (`Start`, `Hold`, `End`) and calculates velocity for dynamic gestures (`SwipeLeft`, `SwipeRight`). Emits clean events to subscribers.
-
-### 4. `core/system_controller.py`
-Handles all OS-level side effects (moving the mouse via `pyautogui`, controlling Windows volume via `pycaw`).
-
-### 5. `core/action_mapper.py` & `config.json`
-Provides a decoupled configuration layer. You can dynamically map engine events to system actions by simply editing `config.json` (e.g., mapping `"onPinchStart": "click"`).
+Aether transforms standard webcam input into a powerful spatial interaction layer. It uses AI-enhanced landmark tracking to control your OS, browser, and applications with sub-millimeter precision.
 
 ---
 
-## 💻 Web Version (Showcase)
+## 🚀 Key Upgrades in v3.0
 
-The `web_version/` directory contains a portfolio-grade JavaScript implementation of the Aether architecture. 
+### 🧠 1. AI-Powered Recognition
+The system now features an integrated **Scikit-Learn Random Forest Classifier**. 
+* **Hybrid Logic:** Automatically falls back to high-precision rule-based detection if the AI confidence drops below 65%.
+* **Training Kit:** Includes `scripts/collect_data.py` and `ml/train.py` to add your own custom gestures.
 
-**Features:**
-* **Premium Landing Page:** Glassmorphism UI with CSS grid layout.
-* **JS Event Engine:** Temporal smoothing and pub/sub event logging built natively in ES6 JavaScript.
-* **Smart HUD:** Real-time state logging, FPS tracking, and visual feedback overlays on the canvas.
+### 🛡️ 2. Stability & Smoothing
+* **Temporal Filtering:** Uses rolling majority voting to eliminate "gesture flickering."
+* **Confidence Gating:** Every gesture is verified against a confidence threshold before firing an event.
+* **Interpolated Motion:** Mouse tracking uses exponential smoothing for buttery-smooth cursor movement.
 
-To run locally:
+### 🔌 3. Plugin Architecture
+The `ActionMapper` is now a modular plugin system. 
+* **Dynamic Loading:** Easily swap between `mouse`, `volume`, and `presentation` modes.
+* **SDK Ready:** Developers can subscribe to events (`onPinchStart`, `onSwipeLeft`) and build custom integrations in minutes.
+
+### 👐 4. Multi-Hand Interactions
+Full support for dual-hand gestures including **Two-Hand Zoom** (distance based) and **Rotation**.
+
+### 🎨 5. Premium Web Experience
+The web version has been overhauled with a **Next-Gen HUD**:
+* **Glow FX:** Real-time hand skeleton glow and aesthetic rendering.
+* **Smart Dashboard:** Live event stream, plugin status, and confidence bars.
+* **Responsive Design:** Dark-mode optimized for desktop and mobile displays.
+
+---
+
+## 🛠️ Installation & Setup
+
+### 📦 Installable Tool
+You can now install Aether as a local package:
+```bash
+pip install -e .
+```
+Then run simply with:
+```bash
+aether
+```
+
+### 🐍 Python Requirements
+Ensure you have the core stack installed:
+```bash
+pip install opencv-python mediapipe numpy scikit-learn pyautogui pycaw comtypes
+```
+
+### 🧠 Training Your Own Model
+1. **Collect Data:** `python scripts/collect_data.py <gesture_name>`
+2. **Train:** `python ml/train.py`
+3. **Run:** The system will automatically detect the new `ml/model.pkl`.
+
+---
+
+## ⌨️ Default Mappings (`config.json`)
+
+| Gesture | Event | Action |
+| :--- | :--- | :--- |
+| **Point (Index)** | `onPointHold` | Smooth Mouse Move |
+| **Pinch** | `onPinchStart` | Left Click |
+| **Fist** | `onFistHold` | Drag & Drop |
+| **Peace** | `onPeaceHold` | Vertical Scroll |
+| **Thumbs Up** | `onThumbsUpStart`| Right Click |
+| **Swipe (L/R)** | `onSwipe` | Next/Prev Slide |
+
+---
+
+## 💻 Web Version
+Run the local web server:
 ```bash
 cd web_version
 python -m http.server 8000
 ```
-Then open `http://localhost:8000` in your browser.
-
----
-
-## 🚀 Running the Python OS Controller
-
-Ensure you are using **Python 3.11** (due to MediaPipe legacy module compatibility on Windows).
-
-**Install Dependencies:**
-```bash
-py -3.11 -m pip install opencv-python mediapipe==0.10.14 pyautogui pycaw comtypes
-```
-
-**Run the System:**
-```bash
-py -3.11 main.py
-```
-
-**Default Controls (`config.json`):**
-* **Hold 'Point' (Index up):** Move virtual mouse.
-* **Pinch:** Click mouse.
-* **Hold 'Fist':** Control master volume (mapped to hand distance from center).
-* **Open Palm:** Idle/Reset.
+Visit `http://localhost:8000` to experience the premium interactive dashboard.

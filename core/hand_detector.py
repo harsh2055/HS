@@ -1,79 +1,77 @@
 import cv2
 import mediapipe as mp
-import math
 
 class HandDetector:
-    def __init__(self, static_image_mode=False, max_num_hands=2, model_complexity=1, min_detection_confidence=0.5, min_tracking_confidence=0.5):
+    def __init__(self, mode=False, max_num_hands=2, model_complexity=1, detection_confidence=0.5, tracking_confidence=0.5):
+        self.mode = mode
+        self.max_hands = max_num_hands
+        self.complexity = model_complexity
+        self.detection_con = detection_confidence
+        self.tracking_con = tracking_confidence
+
         self.mpHands = mp.solutions.hands
-        self.hands = self.mpHands.Hands(
-            static_image_mode=static_image_mode, 
-            max_num_hands=max_num_hands, 
-            model_complexity=model_complexity, 
-            min_detection_confidence=min_detection_confidence, 
-            min_tracking_confidence=min_tracking_confidence
-        )
+        self.hands = self.mpHands.Hands(self.mode, self.max_hands, self.complexity, 
+                                        self.detection_con, self.tracking_con)
         self.mpDraw = mp.solutions.drawing_utils
-        self.tipIds = [4, 8, 12, 16, 20]
-        self.results = None
-        self.lmList = []
 
     def process_frame(self, img, draw=True):
-        """Processes the frame and draws landmarks. Returns the image."""
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.results = self.hands.process(imgRGB)
-
-        if self.results.multi_hand_landmarks:
+        
+        if self.results.multi_hand_landmarks and draw:
             for handLms in self.results.multi_hand_landmarks:
-                if draw:
-                    self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
+                # Custom aesthetic drawing
+                self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS,
+                                          self.mpDraw.DrawingSpec(color=(88, 166, 255), thickness=2, circle_radius=2),
+                                          self.mpDraw.DrawingSpec(color=(255, 255, 255), thickness=2, circle_radius=1))
         return img
 
-    def get_landmarks(self, img, handNo=0, draw=True):
-        """Extracts and returns landmark coordinates."""
-        self.lmList = []
-        center_pos = None
-        if self.results and self.results.multi_hand_landmarks:
-            myHand = self.results.multi_hand_landmarks[handNo]
-            h, w, c = img.shape
-            
-            # Calculate hand center (approximate using wrist and middle finger MCP)
-            cx = int(myHand.landmark[9].x * w)
-            cy = int(myHand.landmark[9].y * h)
-            center_pos = (cx, cy)
-            
-            for id, lm in enumerate(myHand.landmark):
-                cx, cy = int(lm.x * w), int(lm.y * h)
-                self.lmList.append([id, cx, cy])
-                if draw:
-                    cv2.circle(img, (cx, cy), 5, (255, 0, 255), cv2.FILLED)
-        return self.lmList, center_pos
+    def get_landmarks(self, img, hand_no=0):
+        lmList = []
+        center = None
+        if self.results.multi_hand_landmarks:
+            if len(self.results.multi_hand_landmarks) > hand_no:
+                myHand = self.results.multi_hand_landmarks[hand_no]
+                h, w, c = img.shape
+                x_vals, y_vals = [], []
+                for id, lm in enumerate(myHand.landmark):
+                    px, py = int(lm.x * w), int(lm.y * h)
+                    lmList.append([id, px, py])
+                    x_vals.append(px)
+                    y_vals.append(py)
+                
+                # Bounding box and center
+                xmin, xmax = min(x_vals), max(x_vals)
+                ymin, ymax = min(y_vals), max(y_vals)
+                center = ((xmin + xmax) // 2, (ymin + ymax) // 2)
+                
+        return lmList, center
 
-    def get_fingers_up(self):
-        """Returns binary array of fingers up [Thumb, Index, Middle, Ring, Pinky]"""
+    def get_multi_landmarks(self, img):
+        all_hands = []
+        if self.results.multi_hand_landmarks:
+            for handLms in self.results.multi_hand_landmarks:
+                lmList = []
+                x_vals, y_vals = [], []
+                h, w, c = img.shape
+                for id, lm in enumerate(handLms.landmark):
+                    px, py = int(lm.x * w), int(lm.y * h)
+                    lmList.append([id, px, py])
+                    x_vals.append(px)
+                    y_vals.append(py)
+                center = ((min(x_vals) + max(x_vals)) // 2, (min(y_vals) + max(y_vals)) // 2)
+                all_hands.append({'lmList': lmList, 'center': center})
+        return all_hands
+
+    def get_fingers_up(self, lmList):
+        if not lmList: return [0,0,0,0,0]
         fingers = []
-        if len(self.lmList) != 0:
-            # Thumb (Checking x axis, right hand heuristic)
-            if self.lmList[self.tipIds[0]][1] > self.lmList[self.tipIds[0] - 1][1]:
-                fingers.append(1)
-            else:
-                fingers.append(0)
-
-            # 4 Fingers (Checking y axis)
-            for id in range(1, 5):
-                if self.lmList[self.tipIds[id]][2] < self.lmList[self.tipIds[id] - 2][2]:
-                    fingers.append(1)
-                else:
-                    fingers.append(0)
+        # Thumb
+        if lmList[4][1] > lmList[3][1]: fingers.append(1)
+        else: fingers.append(0)
+        # Fingers
+        for id in range(1, 5):
+            tip = [8, 12, 16, 20][id-1]
+            if lmList[tip][2] < lmList[tip - 2][2]: fingers.append(1)
+            else: fingers.append(0)
         return fingers
-
-    def find_distance(self, p1, p2):
-        """Find distance between two landmarks (returns length, point details)"""
-        if len(self.lmList) < max(p1, p2) + 1:
-            return 0, [0, 0, 0, 0, 0, 0]
-            
-        x1, y1 = self.lmList[p1][1], self.lmList[p1][2]
-        x2, y2 = self.lmList[p2][1], self.lmList[p2][2]
-        cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
-
-        length = math.hypot(x2 - x1, y2 - y1)
-        return length, [x1, y1, x2, y2, cx, cy]

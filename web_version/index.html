@@ -1,87 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aether | Advanced Gesture System</title>
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
-  
-  <!-- MediaPipe Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <title>Aether Gestures | Next-Gen AI Interaction</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 </head>
-<body>
-
-  <!-- Landing Page -->
-  <div id="landingSection" class="landing-section">
-    <div class="hero">
-      <div class="glass-panel">
-        <h1>Aether Gestures <span class="badge">v2.0</span></h1>
-        <p class="subtitle">A production-grade, event-driven computer vision system.</p>
-        
-        <div class="features-grid">
-          <div class="feature-card">
-            <h3>⚡ Event Engine</h3>
-            <p>Decoupled architecture with temporal smoothing and debouncing.</p>
-          </div>
-          <div class="feature-card">
-            <h3>🖐️ Complex Gestures</h3>
-            <p>Pinch-and-drag, dynamic swipes, and continuous hold tracking.</p>
-          </div>
-          <div class="feature-card">
-            <h3>⚙️ Action Mapping</h3>
-            <p>JSON-based dynamic mapping for mouse control and media events.</p>
-          </div>
+<body class="dark">
+    <nav class="navbar">
+        <div class="logo">AETHER <span>AI</span></div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#demo" class="active">Live Demo</a>
+            <button id="settingsBtn" class="icon-btn">⚙️</button>
         </div>
+    </nav>
 
-        <button id="launchAppBtn" class="btn-primary">Launch Interactive Demo</button>
-      </div>
+    <main class="container">
+        <section id="demo" class="demo-section">
+            <div class="viewport-card">
+                <div class="canvas-container">
+                    <canvas class="output_canvas"></canvas>
+                    <video class="input_video" style="display:none"></video>
+                    
+                    <!-- Glow Overlay -->
+                    <div class="skeleton-glow"></div>
+                    
+                    <!-- Smart HUD -->
+                    <div class="hud-top">
+                        <div class="chip">
+                            <span class="label">ENGINE</span>
+                            <span class="status pulse">AI ACTIVE</span>
+                        </div>
+                        <div id="fpsLabel" class="chip">FPS: 0</div>
+                    </div>
+
+                    <div class="hud-bottom">
+                        <div class="gesture-display">
+                            <div id="gestureIcon" class="gesture-icon">🖐️</div>
+                            <div class="gesture-meta">
+                                <h2 id="gestureLabel">Idle</h2>
+                                <div class="confidence-bar">
+                                    <div id="confidenceFill" class="fill"></div>
+                                </div>
+                                <span id="confidenceText">0% Confidence</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar">
+                    <div class="card event-card">
+                        <h3>⚡ Event Stream</h3>
+                        <ul id="eventLogs"></ul>
+                    </div>
+                    <div class="card plugin-card">
+                        <h3>🔌 Active Plugins</h3>
+                        <div class="plugin-list">
+                            <div class="plugin-item active">Mouse.Core</div>
+                            <div class="plugin-item active">Volume.Sys</div>
+                            <div class="plugin-item">Media.Control</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h2>System Settings</h2>
+            <div class="setting-group">
+                <label>Sensitivity</label>
+                <input type="range" min="1" max="10" value="5">
+            </div>
+            <div class="setting-group">
+                <label>AI Filtering</label>
+                <input type="checkbox" checked>
+            </div>
+            <button id="closeModal" class="btn-primary">Save Changes</button>
+        </div>
     </div>
-  </div>
 
-  <!-- Main App Interface -->
-  <div id="appSection" class="app-section" style="display: none;">
-    <div class="top-bar">
-      <div class="brand">Aether System</div>
-      <div class="controls">
-        <button id="toggleCameraBtn" class="btn-secondary">Stop Camera</button>
-        <button id="closeAppBtn" class="btn-ghost">Exit</button>
-      </div>
-    </div>
-
-    <div class="workspace">
-      <div class="video-panel">
-        <video class="input_video" style="display: none;" autoplay playsinline></video>
-        <canvas class="output_canvas" width="800" height="600"></canvas>
-        <div id="loadingOverlay" class="loading-overlay">
-          <div class="spinner"></div>
-          <p>Initializing Neural Networks...</p>
-        </div>
-        
-        <!-- Smart HUD -->
-        <div class="smart-hud">
-          <div class="hud-stat">
-            <span class="label">STATE</span>
-            <span id="gestureState" class="value text-green">Idle</span>
-          </div>
-          <div class="hud-stat">
-            <span class="label">FPS</span>
-            <span id="fpsCount" class="value">0</span>
-          </div>
-        </div>
-
-        <!-- Event Log -->
-        <div class="event-logger">
-          <h4>Event Stream</h4>
-          <ul id="eventList"></ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

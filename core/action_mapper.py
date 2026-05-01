@@ -1,54 +1,57 @@
 import json
+import os
+import importlib
 
 class ActionMapper:
-    """Reads configuration and maps events to system actions."""
-    def __init__(self, event_engine, sys_controller):
-        self.engine = event_engine
-        self.sys = sys_controller
-        self.w_cam, self.h_cam = 640, 480
-        self.w_scr, self.h_scr = 1920, 1080 # Defaults, overridden later
-        
-        # Default Config Fallback
-        self.config = {
-            "onPinchStart": "click",
-            "onPointHold": "move_mouse",
-            "onFistHold": "change_volume"
-        }
+    def __init__(self, engine, controller, config_path='config.json'):
+        self.engine = engine
+        self.controller = controller
+        self.config_path = config_path
+        self.plugins = {}
         self.load_config()
+        self.load_plugins()
         self._bind_events()
 
     def load_config(self):
-        try:
-            with open('config.json', 'r') as f:
+        if os.path.exists(self.config_path):
+            with open(self.config_path, 'r') as f:
                 self.config = json.load(f)
-        except Exception:
-            print("Using default action mappings.")
+        else:
+            # Default production config
+            self.config = {
+                "onPointHold": {"plugin": "core", "action": "move_mouse"},
+                "onPinchStart": {"plugin": "core", "action": "click"},
+                "onFistStart": {"plugin": "core", "action": "start_drag"},
+                "onFistEnd": {"plugin": "core", "action": "end_drag"},
+                "onPeaceHold": {"plugin": "core", "action": "scroll"},
+                "onThumbsUpStart": {"plugin": "core", "action": "right_click"},
+                "onSwipeLeft": {"plugin": "presentation", "action": "prev_slide"},
+                "onSwipeRight": {"plugin": "presentation", "action": "next_slide"}
+            }
+            with open(self.config_path, 'w') as f:
+                json.dump(self.config, f, indent=4)
+
+    def load_plugins(self):
+        # In a real system, we'd loop through the plugins/ folder
+        # For now, we mock the plugin loader
+        self.plugins['core'] = self.controller
+        
+        # Example presentation plugin mock
+        class PresentationPlugin:
+            def __init__(self, ctrl): self.ctrl = ctrl
+            def next_slide(self, data=None): self.ctrl.press_key('right')
+            def prev_slide(self, data=None): self.ctrl.press_key('left')
+            
+        self.plugins['presentation'] = PresentationPlugin(self.controller)
 
     def _bind_events(self):
-        # Dynamically bind events based on config
-        for event, action in self.config.items():
-            if action == "click":
-                self.engine.subscribe(event, self._action_click)
-            elif action == "move_mouse":
-                self.engine.subscribe(event, self._action_move_mouse)
-            elif action == "change_volume":
-                self.engine.subscribe(event, self._action_change_volume)
-
-    def _action_click(self, **kwargs):
-        self.sys.click()
-
-    def _action_move_mouse(self, **kwargs):
-        lmList = kwargs.get('landmarks', [])
-        if len(lmList) > 8:
-            x, y = lmList[8][1], lmList[8][2]
-            self.sys.move_mouse(x, y, self.w_cam, self.h_cam, self.w_scr, self.h_scr)
-
-    def _action_change_volume(self, **kwargs):
-        lmList = kwargs.get('landmarks', [])
-        if len(lmList) > 8:
-            import math
-            # Calculate pinch distance dynamically for volume
-            x1, y1 = lmList[4][1], lmList[4][2]
-            x2, y2 = lmList[8][1], lmList[8][2]
-            length = math.hypot(x2 - x1, y2 - y1)
-            self.sys.set_volume(length)
+        for event, target in self.config.items():
+            plugin_name = target.get('plugin')
+            action_name = target.get('action')
+            
+            if plugin_name in self.plugins:
+                plugin = self.plugins[plugin_name]
+                if hasattr(plugin, action_name):
+                    callback = getattr(plugin, action_name)
+                    self.engine.subscribe(event, callback)
+                    print(f"🔗 Bound {event} -> {plugin_name}.{action_name}")
