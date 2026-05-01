@@ -41,9 +41,13 @@ function onResults(results) {
 
     if (results.multiHandLandmarks) {
         for (const landmarks of results.multiHandLandmarks) {
-            // Aesthetic Drawing
-            drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: '#58a6ff', lineWidth: 4});
-            drawLandmarks(canvasCtx, landmarks, {color: '#ffffff', lineWidth: 1, radius: 2});
+            try {
+                // Aesthetic Drawing
+                drawConnectors(canvasCtx, landmarks, window.HAND_CONNECTIONS || HAND_CONNECTIONS, {color: '#58a6ff', lineWidth: 4});
+                drawLandmarks(canvasCtx, landmarks, {color: '#ffffff', lineWidth: 1, radius: 2});
+            } catch (e) {
+                console.warn("Drawing error:", e);
+            }
             
             // Simple rule-based logic for web demo (matching Python core)
             const gesture = recognizeWeb(landmarks);
@@ -98,8 +102,8 @@ const hands = new Hands({locateFile: (file) => {
 hands.setOptions({
     maxNumHands: 2,
     modelComplexity: 1,
-    minDetectionConfidence: 0.7,
-    minTrackingConfidence: 0.7
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5
 });
 
 hands.onResults(onResults);

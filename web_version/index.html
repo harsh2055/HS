@@ -5,9 +5,10 @@
     <title>Aether Gestures | Next-Gen AI Interaction</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 </head>
 <body class="dark">
     <nav class="navbar">
@@ -23,8 +24,8 @@
         <section id="demo" class="demo-section">
             <div class="viewport-card">
                 <div class="canvas-container">
-                    <canvas class="output_canvas"></canvas>
-                    <video class="input_video" style="display:none"></video>
+                    <canvas class="output_canvas" width="1280" height="720"></canvas>
+                    <video class="input_video" style="display:none" playsinline></video>
                     
                     <!-- Glow Overlay -->
                     <div class="skeleton-glow"></div>
